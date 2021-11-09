@@ -55,8 +55,8 @@ contract LiteDAOtoken {
     mapping(address => uint256) public numCheckpoints;
 
     struct Checkpoint {
-        uint256 fromTimestamp;
-        uint256 votes;
+        uint32 fromTimestamp;
+        uint224 votes;
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -91,11 +91,15 @@ contract LiteDAOtoken {
 
         INITIAL_CHAIN_ID = block.chainid;
         INITIAL_DOMAIN_SEPARATOR = _computeDomainSeparator();
+        
+        // this is reasonably safe from overflow because incrementing `i` loop beyond
+        // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits
+        unchecked {
+            for (uint256 i; i < voters.length; i++) {
+                _mint(voters[i], shares[i]);
 
-        for (uint256 i; i < voters.length; i++) {
-            _mint(voters[i], shares[i]);
-
-            _delegate(voters[i], voters[i]);
+                _delegate(voters[i], voters[i]);
+            }
         }
     }
 
@@ -114,8 +118,8 @@ contract LiteDAOtoken {
     function transfer(address to, uint256 amount) external notPaused returns (bool) {
         balanceOf[msg.sender] -= amount;
 
-        // This is safe because the sum of all user
-        // balances can't exceed 'type(uint256).max'.
+        // this is safe from overflow because the sum of all user
+        // balances can't exceed 'type(uint256).max'
         unchecked {
             balanceOf[to] += amount;
         }
@@ -136,8 +140,8 @@ contract LiteDAOtoken {
 
         balanceOf[from] -= amount;
 
-        // This is safe because the sum of all user
-        // balances can't exceed 'type(uint256).max'.
+        // this is safe from overflow because the sum of all user
+        // balances can't exceed 'type(uint256).max'
         unchecked {
             balanceOf[to] += amount;
         }
@@ -157,6 +161,7 @@ contract LiteDAOtoken {
     }
 
     function getCurrentVotes(address account) external view returns (uint256 votes) {
+        // this is safe from underflow because decrement only occurs if `nCheckpoints` is positive
         unchecked {
             uint256 nCheckpoints = numCheckpoints[account];
 
@@ -176,7 +181,9 @@ contract LiteDAOtoken {
         address signatory = ecrecover(digest, v, r, s);
 
         require(signatory != address(0), "ZERO_ADDRESS");
-
+        
+        // this is reasonably safe from overflow because incrementing `nonces` beyond
+        // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits
         unchecked {
             require(nonce == nonces[signatory]++, "INVALID_NONCE");
         }
@@ -194,7 +201,8 @@ contract LiteDAOtoken {
         if (nCheckpoints == 0) {
             return 0;
         }
-
+        
+        // this is safe from underflow because decrement only occurs if `nCheckpoints` is positive
         unchecked {
             if (checkpoints[account][nCheckpoints - 1].fromTimestamp <= timestamp) {
                 return checkpoints[account][nCheckpoints - 1].votes;
@@ -205,10 +213,11 @@ contract LiteDAOtoken {
             }
 
             uint256 lower;
-
+            // this is safe from underflow because decrement only occurs if `nCheckpoints` is positive
             uint256 upper = nCheckpoints - 1;
 
             while (upper > lower) {
+                // this is safe from underflow because `upper` ceiling is provided
                 uint256 center = upper - (upper - lower) / 2;
 
                 Checkpoint memory cp = checkpoints[account][center];
@@ -238,38 +247,38 @@ contract LiteDAOtoken {
     }
 
     function _moveDelegates(address srcRep, address dstRep, uint256 amount) internal {
-        unchecked {
-            if (srcRep != dstRep && amount > 0) {
-                if (srcRep != address(0)) {
-                    uint256 srcRepNum = numCheckpoints[srcRep];
+        if (srcRep != dstRep && amount > 0) {
+            if (srcRep != address(0)) {
+                uint256 srcRepNum = numCheckpoints[srcRep];
+                
+                uint256 srcRepOld = srcRepNum > 0 ? checkpoints[srcRep][srcRepNum - 1].votes : 0;
 
-                    uint256 srcRepOld = srcRepNum > 0 ? checkpoints[srcRep][srcRepNum - 1].votes : 0;
+                uint256 srcRepNew = srcRepOld - amount;
 
-                    uint256 srcRepNew = srcRepOld - amount;
+                _writeCheckpoint(srcRep, srcRepNum, srcRepOld, srcRepNew);
+            }
 
-                    _writeCheckpoint(srcRep, srcRepNum, srcRepOld, srcRepNew);
-                }
+            if (dstRep != address(0)) {
+                uint256 dstRepNum = numCheckpoints[dstRep];
 
-                if (dstRep != address(0)) {
-                    uint256 dstRepNum = numCheckpoints[dstRep];
+                uint256 dstRepOld = dstRepNum > 0 ? checkpoints[dstRep][dstRepNum - 1].votes : 0;
 
-                    uint256 dstRepOld = dstRepNum > 0 ? checkpoints[dstRep][dstRepNum - 1].votes : 0;
+                uint256 dstRepNew = dstRepOld + amount;
 
-                    uint256 dstRepNew = dstRepOld + amount;
-
-                    _writeCheckpoint(dstRep, dstRepNum, dstRepOld, dstRepNew);
-                }
+                _writeCheckpoint(dstRep, dstRepNum, dstRepOld, dstRepNew);
             }
         }
     }
 
     function _writeCheckpoint(address delegatee, uint256 nCheckpoints, uint256 oldVotes, uint256 newVotes) internal {
+        // this is safe from underflow because decrement only occurs if `nCheckpoints` is positive
         unchecked {
             if (nCheckpoints > 0 && checkpoints[delegatee][nCheckpoints - 1].fromTimestamp == block.timestamp) {
-                checkpoints[delegatee][nCheckpoints - 1].votes = newVotes;
+                checkpoints[delegatee][nCheckpoints - 1].votes = safeCastTo224(newVotes);
             } else {
-                checkpoints[delegatee][nCheckpoints] = Checkpoint(block.timestamp, newVotes);
-
+                checkpoints[delegatee][nCheckpoints] = Checkpoint(safeCastTo32(block.timestamp), safeCastTo224(newVotes));
+                // this is reasonably safe from overflow because incrementing `nCheckpoints` beyond
+                // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits
                 numCheckpoints[delegatee] = nCheckpoints + 1;
             }
         }
@@ -308,8 +317,8 @@ contract LiteDAOtoken {
     ) external {
         require(block.timestamp <= deadline, "PERMIT_DEADLINE_EXPIRED");
 
-        // This is reasonably safe from overflow because incrementing `nonces` beyond
-        // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits.
+        // this is reasonably safe from overflow because incrementing `nonces` beyond
+        // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits
         unchecked {
             bytes32 digest = keccak256(
                 abi.encodePacked(
@@ -335,8 +344,8 @@ contract LiteDAOtoken {
     function _mint(address to, uint256 amount) internal {
         totalSupply += amount;
 
-        // This is safe because the sum of all user
-        // balances can't exceed 'type(uint256).max'.
+        // this is safe because the sum of all user
+        // balances can't exceed 'type(uint256).max'
         unchecked {
             balanceOf[to] += amount;
         }
@@ -347,8 +356,8 @@ contract LiteDAOtoken {
     function _burn(address from, uint256 amount) internal {
         balanceOf[from] -= amount;
 
-        // This is safe because a user won't ever
-        // have a balance larger than `totalSupply`.
+        // this is safe because a user won't ever
+        // have a balance larger than `totalSupply`
         unchecked {
             totalSupply -= amount;
         }
@@ -364,5 +373,21 @@ contract LiteDAOtoken {
         paused = !paused;
 
         emit TogglePause(paused);
+    }
+    
+     /*///////////////////////////////////////////////////////////////
+                           SAFECAST LOGIC
+    //////////////////////////////////////////////////////////////*/
+    
+    function safeCastTo32(uint256 x) internal pure returns (uint32 y) {
+        require(x <= type(uint32).max);
+
+        y = uint32(x);
+    }
+    
+    function safeCastTo224(uint256 x) internal pure returns (uint224 y) {
+        require(x <= type(uint224).max);
+
+        y = uint224(x);
     }
 }
