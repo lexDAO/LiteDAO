@@ -1,0 +1,29 @@
+{
+  "name": "@athena/subgraph",
+  "version": "0.0.1",
+  "description": "Athena Subgraph",
+  "license": "GPL-3.0",
+  "author": "daodesigner",
+  "scripts": {
+    "codegen": "graph codegen",
+    "lint:js": "eslint 'src/*.ts'",
+    "lint": "yarn lint:js",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ lexdao/athena",
+    "create-local": "graph create --node http://localhost:8020/ lexdao/athena",
+    "remove-local": "graph remove --node http://localhost:8020/ lexdao/athena",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 lexdao/athena"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.21.1",
+    "@graphprotocol/graph-ts": "0.20.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.34.0",
+    "@typescript-eslint/parser": "^2.34.0",
+    "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^8.3.0",
+    "mustache": "^4.2.0"
+  }
+}

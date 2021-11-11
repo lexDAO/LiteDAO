@@ -1,0 +1,44 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: LiteDAO
+    network: xdai
+    source:
+      address: "0xb24D70675ca178392002781D0332DF2FE0d836c2"
+      abi: LiteDAO
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - DelegateChanged
+        - DelegateVotesChanged
+        - NewProposal
+        - ProposalProcessed
+        - TogglePause
+        - Transfer
+        - VoteCast
+      abis:
+        - name: LiteDAO
+          file: ./abis/LiteDAO.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval
+        - event: DelegateChanged(indexed address,indexed address,indexed address)
+          handler: handleDelegateChanged
+        - event: DelegateVotesChanged(indexed address,uint256,uint256)
+          handler: handleDelegateVotesChanged
+        - event: NewProposal(indexed uint256)
+          handler: handleNewProposal
+        - event: ProposalProcessed(indexed uint256)
+          handler: handleProposalProcessed
+        - event: TogglePause(indexed bool)
+          handler: handleTogglePause
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+        - event: VoteCast(indexed address,indexed uint256,indexed bool)
+          handler: handleVoteCast
+      file: ./src/mapping.ts
