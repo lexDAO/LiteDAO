@@ -46,7 +46,7 @@ contract LiteDAOtoken {
 
     bool public paused;
 
-    bytes32 public constant DELEGATION_TYPEHASH = keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
+    bytes32 public constant DELEGATION_TYPEHASH = keccak256('Delegation(address delegatee,uint256 nonce,uint256 expiry)');
 
     mapping(address => address) public delegates;
 
@@ -64,7 +64,7 @@ contract LiteDAOtoken {
     //////////////////////////////////////////////////////////////*/
 
     bytes32 public constant PERMIT_TYPEHASH =
-        keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+        keccak256('Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)');
 
     uint256 internal immutable INITIAL_CHAIN_ID;
 
@@ -83,7 +83,7 @@ contract LiteDAOtoken {
         address[] memory voters,
         uint256[] memory shares
     ) {
-        require(voters.length == shares.length, "NO_ARRAY_PARITY");
+        require(voters.length == shares.length, 'NO_ARRAY_PARITY');
 
         name = name_;
         symbol = symbol_;
@@ -156,7 +156,7 @@ contract LiteDAOtoken {
     //////////////////////////////////////////////////////////////*/
 
     modifier notPaused() {
-        require(!paused, "PAUSED");
+        require(!paused, 'PAUSED');
         _;
     }
 
@@ -176,25 +176,25 @@ contract LiteDAOtoken {
     function delegateBySig(address delegatee, uint256 nonce, uint256 expiry, uint8 v, bytes32 r, bytes32 s) external {
         bytes32 structHash = keccak256(abi.encode(DELEGATION_TYPEHASH, delegatee, nonce, expiry));
 
-        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR(), structHash));
+        bytes32 digest = keccak256(abi.encodePacked('\x19\x01', DOMAIN_SEPARATOR(), structHash));
 
         address signatory = ecrecover(digest, v, r, s);
 
-        require(signatory != address(0), "ZERO_ADDRESS");
+        require(signatory != address(0), 'ZERO_ADDRESS');
         
         // this is reasonably safe from overflow because incrementing `nonces` beyond
         // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits
         unchecked {
-            require(nonce == nonces[signatory]++, "INVALID_NONCE");
+            require(nonce == nonces[signatory]++, 'INVALID_NONCE');
         }
 
-        require(block.timestamp <= expiry, "SIGNATURE_EXPIRED");
+        require(block.timestamp <= expiry, 'SIGNATURE_EXPIRED');
 
         _delegate(signatory, delegatee);
     }
 
     function getPriorVotes(address account, uint256 timestamp) public view returns (uint256 votes) {
-        require(block.timestamp > timestamp, "NOT_YET_DETERMINED");
+        require(block.timestamp > timestamp, 'NOT_YET_DETERMINED');
 
         uint256 nCheckpoints = numCheckpoints[account];
 
@@ -293,9 +293,9 @@ contract LiteDAOtoken {
     function _computeDomainSeparator() internal view returns (bytes32 domainSeparator) {
         domainSeparator = keccak256(
             abi.encode(
-                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'),
                 keccak256(bytes(name)),
-                keccak256(bytes("1")),
+                keccak256(bytes('1')),
                 block.chainid,
                 address(this)
             )
@@ -315,21 +315,21 @@ contract LiteDAOtoken {
         bytes32 r,
         bytes32 s
     ) external {
-        require(block.timestamp <= deadline, "PERMIT_DEADLINE_EXPIRED");
+        require(block.timestamp <= deadline, 'PERMIT_DEADLINE_EXPIRED');
 
         // this is reasonably safe from overflow because incrementing `nonces` beyond
         // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits
         unchecked {
             bytes32 digest = keccak256(
                 abi.encodePacked(
-                    "\x19\x01",
+                    '\x19\x01',
                     DOMAIN_SEPARATOR(),
                     keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
                 )
             );
 
             address recoveredAddress = ecrecover(digest, v, r, s);
-            require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_PERMIT_SIGNATURE");
+            require(recoveredAddress != address(0) && recoveredAddress == owner, 'INVALID_PERMIT_SIGNATURE');
 
             allowance[recoveredAddress][spender] = value;
         }

@@ -34,7 +34,8 @@
     "build:subgraph": "yarn workspace @athena/subgraph run codegen && yarn workspace @athena/subgraph run build",
     "test": "yarn workspaces run test",
     "test:contracts": "yarn workspace @athena/contracts run test",
-    "deploy:subgraph":"yarn workspace @athena/subgraph run deploy"
+    "deploy:subgraph":"yarn workspace @athena/subgraph run deploy",
+    "lint": "yarn workspaces run lint"
   },
   "devDependencies": {
     "typechain": "^3.0.0"

@@ -86,9 +86,9 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         )
 
     {
-        require(quorum_ <= 100, "QUORUM_MAX");
+        require(quorum_ <= 100, 'QUORUM_MAX');
         
-        require(supermajority_ <= 100, "SUPERMAJORITY_MAX");
+        require(supermajority_ <= 100, 'SUPERMAJORITY_MAX');
         
         votingPeriod = votingPeriod_;
         
@@ -103,7 +103,7 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         uint8 call,
         uint8 gov
     ) external {
-        require(!initialized, "INITIALIZED");
+        require(!initialized, 'INITIALIZED');
 
         proposalVoteTypes[ProposalType.MINT] = VoteType(mint);
 
@@ -121,7 +121,7 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
     //////////////////////////////////////////////////////////////*/
 
     modifier onlyTokenHolders() {
-        require(balanceOf[msg.sender] > 0, "NOT_TOKEN_HOLDER");
+        require(balanceOf[msg.sender] > 0, 'NOT_TOKEN_HOLDER');
         _;
     }
 
@@ -157,14 +157,14 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
     }
 
     function vote(uint256 proposal, bool approve) external onlyTokenHolders {
-        require(!voted[proposal][msg.sender], "ALREADY_VOTED");
+        require(!voted[proposal][msg.sender], 'ALREADY_VOTED');
         
         Proposal storage prop = proposals[proposal];
         
         // this is safe from overflow because `votingPeriod` is capped so it will not combine
         // with unix time to exceed 'type(uint256).max'
         unchecked {
-            require(block.timestamp <= prop.creationTime + votingPeriod, "VOTING_ENDED");
+            require(block.timestamp <= prop.creationTime + votingPeriod, 'VOTING_ENDED');
         }
 
         uint256 weight = getPriorVotes(msg.sender, prop.creationTime);
@@ -191,7 +191,7 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
 
         // * COMMENTED OUT FOR TESTING * ///
         // unchecked {
-        // require(block.timestamp > prop.creationTime + votingPeriod, "VOTING_NOT_ENDED");
+        // require(block.timestamp > prop.creationTime + votingPeriod, 'VOTING_NOT_ENDED');
         // }
 
         bool didProposalPass = _countVotes(voteType, prop.yesVotes, prop.noVotes);
@@ -235,7 +235,7 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
             unchecked {
                 uint256 votes = yesVotes + noVotes;
 
-                require(votes >= minVotes, "QUORUM_REQUIRED");
+                require(votes >= minVotes, 'QUORUM_REQUIRED');
             }
         }
 
