@@ -1,0 +1,150 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/Users/Q/Desktop/git/lexDAO/LiteDAO/contracts/contracts/Factory.sol": {
+      "lastModificationDate": 1636631379033,
+      "contentHash": "1cd83af1792ba399187c4f18399ca730",
+      "sourceName": "contracts/Factory.sol",
+      "solcConfig": {
+        "version": "0.8.0",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./LiteDAO.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.0"
+      ],
+      "artifacts": [
+        "LiteDAOfactory"
+      ]
+    },
+    "/Users/Q/Desktop/git/lexDAO/LiteDAO/contracts/contracts/LiteDAO.sol": {
+      "lastModificationDate": 1636631379153,
+      "contentHash": "09bd9c248fe0ec9133456d365979c1c4",
+      "sourceName": "contracts/LiteDAO.sol",
+      "solcConfig": {
+        "version": "0.8.0",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./LiteDAOtoken.sol",
+        "./LiteDAOnftHelper.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.0"
+      ],
+      "artifacts": [
+        "LiteDAO"
+      ]
+    },
+    "/Users/Q/Desktop/git/lexDAO/LiteDAO/contracts/contracts/LiteDAOtoken.sol": {
+      "lastModificationDate": 1636631379232,
+      "contentHash": "cf0f8dcbbf147516ed24c297403a75e9",
+      "sourceName": "contracts/LiteDAOtoken.sol",
+      "solcConfig": {
+        "version": "0.8.0",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.8.0"
+      ],
+      "artifacts": [
+        "LiteDAOtoken"
+      ]
+    },
+    "/Users/Q/Desktop/git/lexDAO/LiteDAO/contracts/contracts/LiteDAOnftHelper.sol": {
+      "lastModificationDate": 1636631379205,
+      "contentHash": "1cd7275ee33ae5a944d6aa63016f701c",
+      "sourceName": "contracts/LiteDAOnftHelper.sol",
+      "solcConfig": {
+        "version": "0.8.0",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.8.0"
+      ],
+      "artifacts": [
+        "LiteDAOnftHelper"
+      ]
+    }
+  }
+}

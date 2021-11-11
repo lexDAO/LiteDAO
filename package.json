@@ -1,0 +1,42 @@
+{
+  "name": "@athena/athena",
+  "version": "0.0.1",
+  "description": "Project Athena: Minimal DAO OS",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lexDAO/LiteDAO.git"
+  },
+  "keywords": [
+    "athena",
+    "dao",
+    "minimal"
+  ],
+  "author": "daodesigner",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/lexDAO/LiteDAO/issues"
+  },
+  "homepage": "https://github.com/lexDAO/LiteDAO#readme",
+  "private": true,
+  "workspaces":{
+    "packages": [
+      "contracts",
+      "subgraph",
+      "dapp"
+    ],
+    "nohoist": [
+      "**/@nomiclabs/**"
+    ]
+  },
+  "scripts": {
+    "build": "yarn workspaces run build",
+    "build:contracts": "yarn workspace @athena/contracts run build",
+    "build:subgraph": "yarn workspace @athena/subgraph run codegen && yarn workspace @athena/subgraph run build",
+    "test": "yarn workspaces run test",
+    "test:contracts": "yarn workspace @athena/contracts run test",
+    "deploy:subgraph":"yarn workspace @athena/subgraph run deploy"
+  },
+  "devDependencies": {
+    "typechain": "^3.0.0"
+  }
+}

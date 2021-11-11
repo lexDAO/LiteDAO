@@ -1,0 +1,43 @@
+{
+  "name": "@athena/contracts",
+  "version": "0.0.1",
+  "description": "Athena Contracts",
+  "main": "index.js",
+  "scripts": {
+    "hardhat": "hardhat",
+    "build": "hardhat compile",
+    "node": "hardhat node --port 18545",
+    "test": "hardhat test",
+    "lint:js": "eslint '{tests,e2e,scripts}/**/*.ts'",
+    "lint:solidity": "solhint 'contracts/**/*.sol'",
+    "lint": "yarn lint:solidity && yarn lint:js"
+  },
+  "devDependencies": {
+    "ts-node": "^9.1.1",
+    "typechain": "^5.1.2",
+    "typescript": "^4.2.3",
+    "eslint": "^6.8.0",
+    "dotenv": "^8.2.0",
+    "chai": "^4.3.3",
+    "chai-as-promised": "^7.1.1",
+    "ethereum-waffle": "^3.3.0",
+    "ethers": "^5.0.31",
+    "hardhat": "^2.1.1",
+    "hardhat-abi-exporter": "^2.2.1",
+    "hardhat-contract-sizer": "^2.0.3",
+    "@nomiclabs/hardhat-ganache": "^2.0.0",
+    "@nomiclabs/hardhat-ethers": "^2.0.1",
+    "@nomiclabs/hardhat-etherscan": "^2.1.1",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@typechain/ethers-v5": "^7.0.1",
+    "@typechain/hardhat": "^2.2.0",
+    "@typescript-eslint/eslint-plugin": "^2.34.0",
+    "@typescript-eslint/parser": "^2.34.0",
+    "@types/chai": "^4.2.15",
+    "@types/chai-as-promised": "^7.1.3",
+    "@types/mocha": "^8.2.1",
+    "@types/node": "^14.14.32"
+  },
+  "author": "",
+  "license": "GPL-3.0"
+}

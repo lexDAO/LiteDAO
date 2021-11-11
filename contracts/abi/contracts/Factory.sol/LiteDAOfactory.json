@@ -1,0 +1,108 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "liteDAO",
+        "type": "address"
+      }
+    ],
+    "name": "DAOdeployed",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "daoRegistry",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "name_",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "symbol_",
+        "type": "string"
+      },
+      {
+        "internalType": "bool",
+        "name": "paused_",
+        "type": "bool"
+      },
+      {
+        "internalType": "address[]",
+        "name": "voters",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "shares",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "votingPeriod_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "quorum_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "supermajority_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint8",
+        "name": "mint",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint8",
+        "name": "burn",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint8",
+        "name": "call",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint8",
+        "name": "gov",
+        "type": "uint8"
+      }
+    ],
+    "name": "deployDAO",
+    "outputs": [
+      {
+        "internalType": "contract LiteDAO",
+        "name": "liteDAO",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
