@@ -25,9 +25,9 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
 
     uint256 public votingPeriod;
 
-    uint256 immutable public quorum; // 1-100
+    uint256 public quorum; // 1-100
 
-    uint256 immutable public supermajority; // 1-100
+    uint256 public supermajority; // 1-100
 
     bool private initialized;
 
@@ -54,10 +54,9 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
     struct Proposal {
         ProposalType proposalType;
         string description;
-        address account; // member being added/kicked; account to send money; or account receiving loot
-        address asset; // asset considered for payment
-        uint256 amount; // value to be minted/burned/spent
-        bytes payload; // data for CALL proposals
+        address[] account; // member(s) being added/kicked; account(s) receiving payload
+        uint256[] amount; // value(s) to be minted/burned/spent; gov setting(s)
+        bytes[] payload; // data for CALL proposals
         uint256 yesVotes;
         uint256 noVotes;
         uint256 creationTime;
@@ -86,6 +85,8 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         )
 
     {
+        require(votingPeriod_ <= 365 days, 'VOTING_PERIOD_MAX');
+        
         require(quorum_ <= 100, 'QUORUM_MAX');
         
         require(supermajority_ <= 100, 'SUPERMAJORITY_MAX');
@@ -128,18 +129,28 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
     function propose(
         ProposalType proposalType,
         string calldata description,
-        address account,
-        address asset,
-        uint256 amount,
-        bytes calldata payload
+        address[] calldata account,
+        uint256[] calldata amount,
+        bytes[] calldata payload
     ) external onlyTokenHolders {
+        require(account.length == amount.length && amount.length == payload.length, "NO_ARRAY_PARITY");
+        
+        require(payload.length <= 10, "ARRAY_MAX");
+        
+        if (proposalType == ProposalType.GOV) {
+            require(amount[0] <= 365 days, 'VOTING_PERIOD_MAX');
+            
+            require(amount[1] <= 100, 'QUORUM_MAX');
+            
+            require(amount[2] <= 100, 'SUPERMAJORITY_MAX');
+        }
+        
         uint256 proposal = proposalCount;
 
         proposals[proposal] = Proposal({
             proposalType: proposalType,
             description: description,
             account: account,
-            asset: asset,
             amount: amount,
             payload: payload,
             yesVotes: 0,
@@ -184,7 +195,7 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         emit VoteCast(msg.sender, proposal, approve);
     }
 
-    function processProposal(uint256 proposal) external returns (bool success) {
+    function processProposal(uint256 proposal) external {
         Proposal storage prop = proposals[proposal];
         
         VoteType voteType = proposalVoteTypes[prop.proposalType];
@@ -195,25 +206,36 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         // }
 
         bool didProposalPass = _countVotes(voteType, prop.yesVotes, prop.noVotes);
-
+        
+        // this is reasonably safe from overflow because incrementing `i` loop beyond
+        // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits
         if (didProposalPass) {
-            if (prop.proposalType == ProposalType.MINT) {
-                _mint(prop.account, prop.amount);
-            }
+            unchecked {
+                if (prop.proposalType == ProposalType.MINT) {
+                    for (uint256 i; i < prop.account.length; i++) {
+                        _mint(prop.account[i], prop.amount[i]);
+                    }
+                }
 
-            if (prop.proposalType == ProposalType.BURN) {
-                _burn(prop.account, prop.amount);
-            }
+                if (prop.proposalType == ProposalType.BURN) {
+                    for (uint256 i; i < prop.account.length; i++) {
+                        _burn(prop.account[i], prop.amount[i]);
+                    }
+                }
 
-            if (prop.proposalType == ProposalType.CALL) {
-                (success, ) = prop.account.call{value: prop.amount}(prop.payload);
-            }
+                if (prop.proposalType == ProposalType.CALL) {
+                    for (uint256 i; i < prop.account.length; i++) {
+                        prop.account[i].call{value: prop.amount[i]}(prop.payload[i]);
+                    }
+                }
 
-            if (prop.proposalType == ProposalType.GOV) {
-                if (prop.amount > 0) votingPeriod = prop.amount;
-                if (prop.payload.length > 0) _togglePause();
+                if (prop.proposalType == ProposalType.GOV) {
+                    if (prop.amount[0] > 0) votingPeriod = prop.amount[0];
+                    if (prop.amount[1] > 0) quorum = prop.amount[1];
+                    if (prop.amount[2] > 0) supermajority = prop.amount[2];
+                    if (prop.amount[3] > 0) _togglePause();
+                }
             }
-
         }
 
         delete proposals[proposal];
