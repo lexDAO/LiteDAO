@@ -48,7 +48,7 @@ contract KaliDAOtoken {
 
     bytes32 public constant DELEGATION_TYPEHASH = keccak256('Delegation(address delegatee,uint256 nonce,uint256 expiry)');
 
-    mapping(address => address) public delegates;
+    mapping(address => address) private _delegates;
 
     mapping(address => mapping(uint256 => Checkpoint)) public checkpoints;
 
@@ -123,6 +123,8 @@ contract KaliDAOtoken {
         unchecked {
             balanceOf[to] += amount;
         }
+        
+        _moveDelegates(delegates(msg.sender), delegates(to), amount);
 
         emit Transfer(msg.sender, to, amount);
 
@@ -145,6 +147,8 @@ contract KaliDAOtoken {
         unchecked {
             balanceOf[to] += amount;
         }
+        
+        _moveDelegates(delegates(from), delegates(to), amount);
 
         emit Transfer(from, to, amount);
 
@@ -158,6 +162,11 @@ contract KaliDAOtoken {
     modifier notPaused() {
         require(!paused, 'PAUSED');
         _;
+    }
+    
+    function delegates(address delegator) public view returns (address delegatee) {
+        address current = _delegates[delegator];
+        delegatee = current == address(0) ? delegator : current;
     }
 
     function getCurrentVotes(address account) external view returns (uint256 votes) {
@@ -237,9 +246,9 @@ contract KaliDAOtoken {
     }
 
     function _delegate(address delegator, address delegatee) internal {
-        address currentDelegate = delegates[delegator];
+        address currentDelegate = delegates(delegator);
 
-        delegates[delegator] = delegatee;
+        _delegates[delegator] = delegatee;
 
         _moveDelegates(currentDelegate, delegatee, balanceOf[delegator]);
 
