@@ -3,7 +3,7 @@
 pragma solidity >=0.8.0;
 
 /// @notice Helper for NFT 'safe' transfers.
-contract LiteDAOnftHelper {
+contract KaliDAOnftHelper {
     function onERC721Received(
         address,
         address,
