@@ -73,7 +73,7 @@ contract KaliDAOtoken {
     mapping(address => uint256) public nonces;
 
     /*///////////////////////////////////////////////////////////////
-                            CONSTRUCTOR
+                           CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
     constructor(
@@ -98,7 +98,7 @@ contract KaliDAOtoken {
             for (uint256 i; i < voters.length; i++) {
                 _mint(voters[i], shares[i]);
 
-                _delegate(voters[i], voters[i]);
+                _moveDelegates(address(0), delegates(voters[i]), shares[i]);
             }
         }
     }
@@ -246,7 +246,7 @@ contract KaliDAOtoken {
     }
 
     function _delegate(address delegator, address delegatee) internal {
-        address currentDelegate = delegates(delegator);
+        address currentDelegate = _delegates[delegator];
 
         _delegates[delegator] = delegatee;
 
