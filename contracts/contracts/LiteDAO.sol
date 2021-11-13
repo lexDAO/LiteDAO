@@ -12,7 +12,7 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
     //////////////////////////////////////////////////////////////*/
 
     event NewProposal(uint256 indexed proposal);
-    
+
     event VoteCast(address indexed voter, uint256 indexed proposal, bool indexed approve);
 
     event ProposalProcessed(uint256 indexed proposal);
@@ -34,7 +34,7 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
     mapping(uint256 => Proposal) public proposals;
 
     mapping(ProposalType => VoteType) public proposalVoteTypes;
-    
+
     mapping(uint256 => mapping(address => bool)) public voted;
 
     enum ProposalType {
@@ -86,15 +86,15 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
 
     {
         require(votingPeriod_ <= 365 days, 'VOTING_PERIOD_MAX');
-        
+
         require(quorum_ <= 100, 'QUORUM_MAX');
-        
+
         require(supermajority_ <= 100, 'SUPERMAJORITY_MAX');
-        
+
         votingPeriod = votingPeriod_;
-        
+
         quorum = quorum_;
-        
+
         supermajority = supermajority_;
     }
 
@@ -134,17 +134,17 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         bytes[] calldata payload
     ) external onlyTokenHolders {
         require(account.length == amount.length && amount.length == payload.length, "NO_ARRAY_PARITY");
-        
+
         require(payload.length <= 10, "ARRAY_MAX");
-        
+
         if (proposalType == ProposalType.GOV) {
             require(amount[0] <= 365 days, 'VOTING_PERIOD_MAX');
-            
+
             require(amount[1] <= 100, 'QUORUM_MAX');
-            
+
             require(amount[2] <= 100, 'SUPERMAJORITY_MAX');
         }
-        
+
         uint256 proposal = proposalCount;
 
         proposals[proposal] = Proposal({
@@ -157,7 +157,7 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
             noVotes: 0,
             creationTime: block.timestamp
         });
-        
+
         // this is reasonably safe from overflow because incrementing `proposalCount` beyond
         // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits
         unchecked {
@@ -169,9 +169,9 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
 
     function vote(uint256 proposal, bool approve) external onlyTokenHolders {
         require(!voted[proposal][msg.sender], 'ALREADY_VOTED');
-        
+
         Proposal storage prop = proposals[proposal];
-        
+
         // this is safe from overflow because `votingPeriod` is capped so it will not combine
         // with unix time to exceed 'type(uint256).max'
         unchecked {
@@ -179,34 +179,33 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         }
 
         uint256 weight = getPriorVotes(msg.sender, prop.creationTime);
-        
+
         // this is safe from overflow because `yesVotes` and `noVotes` are capped by `totalSupply`
         // which is checked for overflow in `LiteDAOtoken` contract
-        unchecked { 
+        unchecked {
             if (approve) {
                 prop.yesVotes += weight;
             } else {
                 prop.noVotes += weight;
             }
         }
-        
+
         voted[proposal][msg.sender] = true;
-        
+
         emit VoteCast(msg.sender, proposal, approve);
     }
 
     function processProposal(uint256 proposal) external {
         Proposal storage prop = proposals[proposal];
-        
+
         VoteType voteType = proposalVoteTypes[prop.proposalType];
 
-        // * COMMENTED OUT FOR TESTING * ///
-        // unchecked {
-        // require(block.timestamp > prop.creationTime + votingPeriod, 'VOTING_NOT_ENDED');
-        // }
+        unchecked {
+         require(block.timestamp > prop.creationTime + votingPeriod, 'VOTING_NOT_ENDED');
+        }
 
         bool didProposalPass = _countVotes(voteType, prop.yesVotes, prop.noVotes);
-        
+
         // this is reasonably safe from overflow because incrementing `i` loop beyond
         // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits
         if (didProposalPass) {
@@ -251,7 +250,7 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         // rule out any failed quorums
         if (voteType == VoteType.SIMPLE_MAJORITY_QUORUM_REQUIRED || voteType == VoteType.SUPERMAJORITY_QUORUM_REQUIRED) {
             uint256 minVotes = (totalSupply * quorum) / 100;
-            
+
             // this is safe from overflow because `yesVotes` and `noVotes` are capped by `totalSupply`
             // which is checked for overflow in `LiteDAOtoken` contract
             unchecked {
