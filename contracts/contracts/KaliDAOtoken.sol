@@ -5,9 +5,9 @@ pragma solidity >=0.8.0;
 /// @notice Modern and gas efficient ERC20 + EIP-2612 implementation with COMP-style governance,
 /// @author Adapted from RariCapital, https://github.com/Rari-Capital/solmate/blob/main/src/erc20/ERC20.sol,
 /// License-Identifier: AGPL-3.0-only.
-contract LiteDAOtoken {
+contract KaliDAOtoken {
     /*///////////////////////////////////////////////////////////////
-                                  EVENTS
+                            EVENTS
     //////////////////////////////////////////////////////////////*/
 
     event Transfer(address indexed from, address indexed to, uint256 amount);
@@ -21,7 +21,7 @@ contract LiteDAOtoken {
     event TogglePause(bool indexed paused);
 
     /*///////////////////////////////////////////////////////////////
-                             METADATA STORAGE
+                            METADATA STORAGE
     //////////////////////////////////////////////////////////////*/
 
     string public name;
@@ -31,7 +31,7 @@ contract LiteDAOtoken {
     uint8 public constant decimals = 18;
 
     /*///////////////////////////////////////////////////////////////
-                              ERC20 STORAGE
+                            ERC20 STORAGE
     //////////////////////////////////////////////////////////////*/
 
     uint256 public totalSupply;
@@ -41,7 +41,7 @@ contract LiteDAOtoken {
     mapping(address => mapping(address => uint256)) public allowance;
 
     /*///////////////////////////////////////////////////////////////
-                              DAO STORAGE
+                            DAO STORAGE
     //////////////////////////////////////////////////////////////*/
 
     bool public paused;
@@ -60,7 +60,7 @@ contract LiteDAOtoken {
     }
 
     /*///////////////////////////////////////////////////////////////
-                           EIP-2612 STORAGE
+                            EIP-2612 STORAGE
     //////////////////////////////////////////////////////////////*/
 
     bytes32 public constant PERMIT_TYPEHASH =
@@ -73,7 +73,7 @@ contract LiteDAOtoken {
     mapping(address => uint256) public nonces;
 
     /*///////////////////////////////////////////////////////////////
-                               CONSTRUCTOR
+                            CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
     constructor(
@@ -104,7 +104,7 @@ contract LiteDAOtoken {
     }
 
     /*///////////////////////////////////////////////////////////////
-                              ERC20 LOGIC
+                           ERC20 LOGIC
     //////////////////////////////////////////////////////////////*/
 
     function approve(address spender, uint256 amount) external returns (bool) {
@@ -152,7 +152,7 @@ contract LiteDAOtoken {
     }
 
     /*///////////////////////////////////////////////////////////////
-                              DAO LOGIC
+                           DAO LOGIC
     //////////////////////////////////////////////////////////////*/
 
     modifier notPaused() {
@@ -271,8 +271,8 @@ contract LiteDAOtoken {
     }
 
     function _writeCheckpoint(address delegatee, uint256 nCheckpoints, uint256 oldVotes, uint256 newVotes) internal {
-        // this is safe from underflow because decrement only occurs if `nCheckpoints` is positive
         unchecked {
+            // this is safe from underflow because decrement only occurs if `nCheckpoints` is positive
             if (nCheckpoints > 0 && checkpoints[delegatee][nCheckpoints - 1].fromTimestamp == block.timestamp) {
                 checkpoints[delegatee][nCheckpoints - 1].votes = safeCastTo224(newVotes);
             } else {
@@ -287,7 +287,7 @@ contract LiteDAOtoken {
     }
 
     /*///////////////////////////////////////////////////////////////
-                              EIP-2612 LOGIC
+                           EIP-2612 LOGIC
     //////////////////////////////////////////////////////////////*/
 
     function _computeDomainSeparator() internal view returns (bytes32 domainSeparator) {
@@ -375,7 +375,7 @@ contract LiteDAOtoken {
         emit TogglePause(paused);
     }
     
-     /*///////////////////////////////////////////////////////////////
+    /*///////////////////////////////////////////////////////////////
                            SAFECAST LOGIC
     //////////////////////////////////////////////////////////////*/
     
