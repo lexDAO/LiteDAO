@@ -10,7 +10,9 @@
     "test": "hardhat test",
     "lint:js": "eslint '{tests,scripts}/**/*.ts'",
     "lint:solidity": "solhint 'contracts/**/*.sol'",
-    "lint": "yarn lint:solidity"
+    "lint": "yarn lint:solidity",
+    "docs:gitbook": "gitbook serve ./docs",
+    "docs:build": "gitbook build ./docs"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.1",
@@ -35,12 +37,12 @@
     "hardhat-abi-exporter": "^2.2.1",
     "hardhat-contract-sizer": "^2.0.3",
     "hardhat-gas-reporter": "^1.0.4",
+    "solc-0.8": "npm:solc@^0.8.10",
     "solhint": "^3.3.6",
     "ts-node": "^9.1.1",
     "typechain": "^5.1.2",
     "typescript": "^4.2.3"
   },
   "author": "",
-  "license": "GPL-3.0",
-  "dependencies": {}
+  "license": "GPL-3.0"
 }

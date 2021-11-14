@@ -160,6 +160,12 @@ contract LiteDAOtoken {
         _;
     }
 
+    /**
+    * @notice get the current votes delegated to an account
+    * @dev external view function
+    * @param  account address, the account to get the vote weight for
+    * @return votes uint256 delegated to the account
+    */
     function getCurrentVotes(address account) external view returns (uint256 votes) {
         // this is safe from underflow because decrement only occurs if `nCheckpoints` is positive
         unchecked {
@@ -169,6 +175,11 @@ contract LiteDAOtoken {
         }
     }
 
+    /**
+    * @notice Delegate a vote to a delegatee
+    * @dev external function writes new checkpoint to storage
+    * @param delegatee address of delegatee
+    */
     function delegate(address delegatee) external {
         _delegate(msg.sender, delegatee);
     }
@@ -193,6 +204,13 @@ contract LiteDAOtoken {
         _delegate(signatory, delegatee);
     }
 
+    /**
+    * @notice gets the prior votes delegated to an account at a given checkpoint
+    * @dev public view function, returns votes at checkpoint nearest to timestamp
+    * @param account address of account to get prior votes for
+    * @param timestamp timestamp to get prior votes for
+    * @return votes uint256 number of votes for account
+    */
     function getPriorVotes(address account, uint256 timestamp) public view returns (uint256 votes) {
         require(block.timestamp > timestamp, 'NOT_YET_DETERMINED');
 

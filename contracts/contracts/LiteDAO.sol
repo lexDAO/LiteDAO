@@ -66,7 +66,18 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
     /*///////////////////////////////////////////////////////////////
                                CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
-
+    /**
+    * @notice Deploys a new DAO instance.
+    * @dev constructor to deploy DAO
+    * @param name_ Name of the DAO token.
+    * @param symbol_ Symbol of the DAO token.
+    * @param paused_ bool to indicate if DAO token transfers are paused.
+    * @param voters ordered list of addresses that can vote on DAO decisions, to be minted initial tokens
+    * @param shares ordered list of token amounts to be minted for each voter in the voters list, respectively
+    * @param votingPeriod_ uint256 number of seconds to wait before a proposal can be checked and executed.
+    * @param quorum_ uint256 minimum number of individuals required for a proposal to pass with quorum
+    * @param supermajority_ uint256 number of individuals required for a proposal to pass at some specified threshold higher than one half
+    */  
     constructor(
         string memory name_,
         string memory symbol_,
@@ -96,7 +107,14 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         
         supermajority = supermajority_;
     }
-
+    /**
+    * @notice set the vote types used for each of the proposals
+    * @dev external pure function can select from SIMPLE_MAJORITY, SIMPLE_MAJORITY_QUORUM_REQUIRED, SUPERMAJORITY, SUPERMAJORITY_QUORUM_REQUIRED
+    * @param mint uint8 representing the vote type for minting
+    * @param burn uint8 representing the vote type for burning
+    * @param call uint8 representing the vote type for calling
+    * @param gov  uint8 representing the vote type for governing
+    */
     function setVoteTypes(
         uint8 mint,
         uint8 burn,
@@ -124,7 +142,17 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         require(balanceOf[msg.sender] > 0, 'NOT_TOKEN_HOLDER');
         _;
     }
-
+  
+    /**
+    * @notice Creates a new proposal if sender is a token holder
+    * @dev external payable function, account variable is used in different contexts depending on proposal type
+    * @param proposalType index of ProposalType enum for the proposal 
+    * @param description string description of the proposal stored in calldata
+    * @param account smartcontract or user address to execute proposal context against: MINT to account, BURN from account, CALL from contract
+    * @param asset address of the asset to be minted/burned/spent
+    * @param amount uint256 amount of the asset to be minted/burned/spent
+    * @param payload bytes stored in calldata to be passed to the proposal account context for CALL proposals
+    */
     function propose(
         ProposalType proposalType,
         string calldata description,
@@ -139,6 +167,7 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
             proposalType: proposalType,
             description: description,
             account: account,
+            ///NOTE: asset is not used anywhere right now
             asset: asset,
             amount: amount,
             payload: payload,
@@ -156,6 +185,13 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         emit NewProposal(proposal);
     }
 
+   
+    /**
+    * @notice Casts a yes/no vote on a proposal if sender is a token holder
+    * @dev external function, requires balance of sender to be greater than 0
+    * @param proposal uint256 index of the proposal to vote on
+    * @param approve bool true for yes, false for no
+    */ 
     function vote(uint256 proposal, bool approve) external onlyTokenHolders {
         require(!voted[proposal][msg.sender], 'ALREADY_VOTED');
         
@@ -184,6 +220,12 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         emit VoteCast(msg.sender, proposal, approve);
     }
 
+    /**
+    * @notice checks if a proposal has passed the VoteType requirements for it to be executed and is executed if so
+    * @dev external function, can be called by anyone
+    * @param proposal uint256 index of the proposal to check and execute
+    * @return success bool, true if proposal passed requirements and was executed successfully, false if not
+    */
     function processProposal(uint256 proposal) external returns (bool success) {
         Proposal storage prop = proposals[proposal];
         
@@ -221,6 +263,14 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         emit ProposalProcessed(proposal);
     }
 
+    /**
+    * @notice Helper function used to count the number of votes for a proposal depending on the vote type
+    * @dev internal view function, one of SIMPLE_MAJORITY, SIMPLE_MAJORITY_QUORUM_REQUIRED, SUPERMAJORITY, SUPERMAJORITY_QUORUM_REQUIRED
+    * @param voteType VoteType enum value for the proposal
+    * @param yesVotes uint256 number of yes votes
+    * @param noVotes uint256 number of no votes
+    * @return didProposalPass bool, true if proposal passed the vote type requirements, false if not
+    */ 
     function _countVotes(
         VoteType voteType,
         uint256 yesVotes,
