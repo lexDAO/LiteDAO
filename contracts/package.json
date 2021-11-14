@@ -10,9 +10,7 @@
     "test": "hardhat test",
     "lint:js": "eslint '{tests,scripts}/**/*.ts'",
     "lint:solidity": "solhint 'contracts/**/*.sol'",
-    "lint": "yarn lint:solidity",
-    "docs:gitbook": "gitbook serve ./docs",
-    "docs:build": "gitbook build ./docs"
+    "lint": "yarn lint:solidity"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.1",
