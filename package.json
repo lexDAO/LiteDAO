@@ -1,44 +1,20 @@
 {
-  "name": "@athena/athena",
+  "name": "@athena/docs",
   "version": "0.0.1",
-  "description": "Project Athena: Minimal DAO OS",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/lexDAO/LiteDAO.git"
-  },
-  "keywords": [
-    "athena",
-    "dao",
-    "minimal"
-  ],
-  "author": "daodesigner",
-  "license": "GPL-3.0",
-  "bugs": {
-    "url": "https://github.com/lexDAO/LiteDAO/issues"
-  },
-  "homepage": "https://github.com/lexDAO/LiteDAO#readme",
-  "private": true,
-  "workspaces":{
-    "packages": [
-      "contracts",
-      "subgraph",
-      "docs"
-    ],
-    "nohoist": [
-      "**/@nomiclabs/**"
-    ]
-  },
-  "scripts": {
-    "build": "yarn workspaces run build",
-    "build:contracts": "yarn workspace @athena/contracts run build",
-    "build:subgraph": "yarn workspace @athena/subgraph run build",
-    "build:docs": "yarn workspace @athena/docs run build",
-    "test": "yarn workspaces run test",
-    "test:contracts": "yarn workspace @athena/contracts run test",
-    "deploy:subgraph":"yarn workspace @athena/subgraph run deploy",
-    "lint": "yarn workspaces run lint"
+  "description": "Athena Docs",
+  "main": "index.js",
+  "dependencies": {
+    "gitbook-plugin-insert-logo": "^0.1.5",
+    "gitbook-plugin-back-to-top-button": "^0.1.4",
+    "gitbook-plugin-github": "^2.0.0"
   },
   "devDependencies": {
-    "typechain": "^3.0.0"
-  }
+    "gitbook-cli": "2.3.2^"
+  },
+  "scripts": {
+    "serve": "gitbook serve",
+    "build": "gitbook build"
+  },
+  "license": "GPL-3.0",
+  "author": "daodesigner"
 }
