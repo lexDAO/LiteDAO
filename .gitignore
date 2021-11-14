@@ -1,4 +1,8 @@
 /contracts/build/**
+/contracts/abi/**
+/contracts/cache/**
+/contracts/typechain/**
+
 # Logs
 logs
 *.log
