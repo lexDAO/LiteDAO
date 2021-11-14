@@ -160,9 +160,9 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         uint256[] calldata amount,
         bytes[] calldata payload
     ) external onlyTokenHolders {
-        require(account.length == amount.length && amount.length == payload.length, "NO_ARRAY_PARITY");
+        require(account.length == amount.length && amount.length == payload.length, 'NO_ARRAY_PARITY');
 
-        require(payload.length <= 10, "ARRAY_MAX");
+        require(payload.length <= 10, 'ARRAY_MAX');
 
         if (proposalType == ProposalType.GOV) {
             require(amount[0] <= 365 days, 'VOTING_PERIOD_MAX');

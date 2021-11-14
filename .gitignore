@@ -2,6 +2,8 @@
 /contracts/abi/**
 /contracts/cache/**
 /contracts/typechain/**
+/subgraph/build/**
+/subgraph/generated/**
 
 # Logs
 logs
