@@ -20,10 +20,15 @@ import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface LiteDAOnftHelperInterface extends ethers.utils.Interface {
   functions: {
+    "onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)": FunctionFragment;
     "onERC1155Received(address,address,uint256,uint256,bytes)": FunctionFragment;
     "onERC721Received(address,address,uint256,bytes)": FunctionFragment;
   };
 
+  encodeFunctionData(
+    functionFragment: "onERC1155BatchReceived",
+    values: [string, string, BigNumberish[], BigNumberish[], BytesLike]
+  ): string;
   encodeFunctionData(
     functionFragment: "onERC1155Received",
     values: [string, string, BigNumberish, BigNumberish, BytesLike]
@@ -33,6 +38,10 @@ interface LiteDAOnftHelperInterface extends ethers.utils.Interface {
     values: [string, string, BigNumberish, BytesLike]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "onERC1155BatchReceived",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "onERC1155Received",
     data: BytesLike
@@ -89,6 +98,15 @@ export class LiteDAOnftHelper extends BaseContract {
   interface: LiteDAOnftHelperInterface;
 
   functions: {
+    onERC1155BatchReceived(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish[],
+      arg3: BigNumberish[],
+      arg4: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[string] & { sig: string }>;
+
     onERC1155Received(
       arg0: string,
       arg1: string,
@@ -106,6 +124,15 @@ export class LiteDAOnftHelper extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string] & { sig: string }>;
   };
+
+  onERC1155BatchReceived(
+    arg0: string,
+    arg1: string,
+    arg2: BigNumberish[],
+    arg3: BigNumberish[],
+    arg4: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<string>;
 
   onERC1155Received(
     arg0: string,
@@ -125,6 +152,15 @@ export class LiteDAOnftHelper extends BaseContract {
   ): Promise<string>;
 
   callStatic: {
+    onERC1155BatchReceived(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish[],
+      arg3: BigNumberish[],
+      arg4: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
     onERC1155Received(
       arg0: string,
       arg1: string,
@@ -146,6 +182,15 @@ export class LiteDAOnftHelper extends BaseContract {
   filters: {};
 
   estimateGas: {
+    onERC1155BatchReceived(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish[],
+      arg3: BigNumberish[],
+      arg4: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     onERC1155Received(
       arg0: string,
       arg1: string,
@@ -165,6 +210,15 @@ export class LiteDAOnftHelper extends BaseContract {
   };
 
   populateTransaction: {
+    onERC1155BatchReceived(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish[],
+      arg3: BigNumberish[],
+      arg4: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     onERC1155Received(
       arg0: string,
       arg1: string,

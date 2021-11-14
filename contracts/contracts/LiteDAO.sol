@@ -12,7 +12,7 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
     //////////////////////////////////////////////////////////////*/
 
     event NewProposal(uint256 indexed proposal);
-    
+
     event VoteCast(address indexed voter, uint256 indexed proposal, bool indexed approve);
 
     event ProposalProcessed(uint256 indexed proposal);
@@ -25,16 +25,16 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
 
     uint256 public votingPeriod;
 
-    uint256 immutable public quorum; // 1-100
+    uint256 public quorum; // 1-100
 
-    uint256 immutable public supermajority; // 1-100
+    uint256 public supermajority; // 1-100
 
     bool private initialized;
 
     mapping(uint256 => Proposal) public proposals;
 
     mapping(ProposalType => VoteType) public proposalVoteTypes;
-    
+
     mapping(uint256 => mapping(address => bool)) public voted;
 
     enum ProposalType {
@@ -54,10 +54,9 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
     struct Proposal {
         ProposalType proposalType;
         string description;
-        address account; // member being added/kicked; account to send money; or account receiving loot
-        address asset; // asset considered for payment
-        uint256 amount; // value to be minted/burned/spent
-        bytes payload; // data for CALL proposals
+        address[] account; // member(s) being added/kicked; account(s) receiving payload
+        uint256[] amount; // value(s) to be minted/burned/spent; gov setting(s)
+        bytes[] payload; // data for CALL proposals
         uint256 yesVotes;
         uint256 noVotes;
         uint256 creationTime;
@@ -97,14 +96,16 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         )
 
     {
+        require(votingPeriod_ <= 365 days, 'VOTING_PERIOD_MAX');
+
         require(quorum_ <= 100, 'QUORUM_MAX');
-        
+
         require(supermajority_ <= 100, 'SUPERMAJORITY_MAX');
-        
+
         votingPeriod = votingPeriod_;
-        
+
         quorum = quorum_;
-        
+
         supermajority = supermajority_;
     }
     /**
@@ -149,33 +150,41 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
     * @param proposalType index of ProposalType enum for the proposal 
     * @param description string description of the proposal stored in calldata
     * @param account smartcontract or user address to execute proposal context against: MINT to account, BURN from account, CALL from contract
-    * @param asset address of the asset to be minted/burned/spent
     * @param amount uint256 amount of the asset to be minted/burned/spent
     * @param payload bytes stored in calldata to be passed to the proposal account context for CALL proposals
     */
     function propose(
         ProposalType proposalType,
         string calldata description,
-        address account,
-        address asset,
-        uint256 amount,
-        bytes calldata payload
+        address[] calldata account,
+        uint256[] calldata amount,
+        bytes[] calldata payload
     ) external onlyTokenHolders {
+        require(account.length == amount.length && amount.length == payload.length, "NO_ARRAY_PARITY");
+
+        require(payload.length <= 10, "ARRAY_MAX");
+
+        if (proposalType == ProposalType.GOV) {
+            require(amount[0] <= 365 days, 'VOTING_PERIOD_MAX');
+
+            require(amount[1] <= 100, 'QUORUM_MAX');
+
+            require(amount[2] <= 100, 'SUPERMAJORITY_MAX');
+        }
+
         uint256 proposal = proposalCount;
 
         proposals[proposal] = Proposal({
             proposalType: proposalType,
             description: description,
             account: account,
-            ///NOTE: asset is not used anywhere right now
-            asset: asset,
             amount: amount,
             payload: payload,
             yesVotes: 0,
             noVotes: 0,
             creationTime: block.timestamp
         });
-        
+
         // this is reasonably safe from overflow because incrementing `proposalCount` beyond
         // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits
         unchecked {
@@ -194,9 +203,9 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
     */ 
     function vote(uint256 proposal, bool approve) external onlyTokenHolders {
         require(!voted[proposal][msg.sender], 'ALREADY_VOTED');
-        
+
         Proposal storage prop = proposals[proposal];
-        
+
         // this is safe from overflow because `votingPeriod` is capped so it will not combine
         // with unix time to exceed 'type(uint256).max'
         unchecked {
@@ -204,19 +213,19 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         }
 
         uint256 weight = getPriorVotes(msg.sender, prop.creationTime);
-        
+
         // this is safe from overflow because `yesVotes` and `noVotes` are capped by `totalSupply`
         // which is checked for overflow in `LiteDAOtoken` contract
-        unchecked { 
+        unchecked {
             if (approve) {
                 prop.yesVotes += weight;
             } else {
                 prop.noVotes += weight;
             }
         }
-        
+
         voted[proposal][msg.sender] = true;
-        
+
         emit VoteCast(msg.sender, proposal, approve);
     }
 
@@ -224,38 +233,47 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
     * @notice checks if a proposal has passed the VoteType requirements for it to be executed and is executed if so
     * @dev external function, can be called by anyone
     * @param proposal uint256 index of the proposal to check and execute
-    * @return success bool, true if proposal passed requirements and was executed successfully, false if not
     */
-    function processProposal(uint256 proposal) external returns (bool success) {
+    function processProposal(uint256 proposal) external {
         Proposal storage prop = proposals[proposal];
-        
+
         VoteType voteType = proposalVoteTypes[prop.proposalType];
 
-        // * COMMENTED OUT FOR TESTING * ///
-        // unchecked {
-        // require(block.timestamp > prop.creationTime + votingPeriod, 'VOTING_NOT_ENDED');
-        // }
+        unchecked {
+         require(block.timestamp > prop.creationTime + votingPeriod, 'VOTING_NOT_ENDED');
+        }
 
         bool didProposalPass = _countVotes(voteType, prop.yesVotes, prop.noVotes);
 
+        // this is reasonably safe from overflow because incrementing `i` loop beyond
+        // 'type(uint256).max' is exceedingly unlikely compared to optimization benefits
         if (didProposalPass) {
-            if (prop.proposalType == ProposalType.MINT) {
-                _mint(prop.account, prop.amount);
-            }
+            unchecked {
+                if (prop.proposalType == ProposalType.MINT) {
+                    for (uint256 i; i < prop.account.length; i++) {
+                        _mint(prop.account[i], prop.amount[i]);
+                    }
+                }
 
-            if (prop.proposalType == ProposalType.BURN) {
-                _burn(prop.account, prop.amount);
-            }
+                if (prop.proposalType == ProposalType.BURN) {
+                    for (uint256 i; i < prop.account.length; i++) {
+                        _burn(prop.account[i], prop.amount[i]);
+                    }
+                }
 
-            if (prop.proposalType == ProposalType.CALL) {
-                (success, ) = prop.account.call{value: prop.amount}(prop.payload);
-            }
+                if (prop.proposalType == ProposalType.CALL) {
+                    for (uint256 i; i < prop.account.length; i++) {
+                        prop.account[i].call{value: prop.amount[i]}(prop.payload[i]);
+                    }
+                }
 
-            if (prop.proposalType == ProposalType.GOV) {
-                if (prop.amount > 0) votingPeriod = prop.amount;
-                if (prop.payload.length > 0) _togglePause();
+                if (prop.proposalType == ProposalType.GOV) {
+                    if (prop.amount[0] > 0) votingPeriod = prop.amount[0];
+                    if (prop.amount[1] > 0) quorum = prop.amount[1];
+                    if (prop.amount[2] > 0) supermajority = prop.amount[2];
+                    if (prop.amount[3] > 0) _togglePause();
+                }
             }
-
         }
 
         delete proposals[proposal];
@@ -279,7 +297,7 @@ contract LiteDAO is LiteDAOtoken, LiteDAOnftHelper {
         // rule out any failed quorums
         if (voteType == VoteType.SIMPLE_MAJORITY_QUORUM_REQUIRED || voteType == VoteType.SUPERMAJORITY_QUORUM_REQUIRED) {
             uint256 minVotes = (totalSupply * quorum) / 100;
-            
+
             // this is safe from overflow because `yesVotes` and `noVotes` are capped by `totalSupply`
             // which is checked for overflow in `LiteDAOtoken` contract
             unchecked {

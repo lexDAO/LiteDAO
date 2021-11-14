@@ -37,6 +37,7 @@ interface LiteDAOInterface extends ethers.utils.Interface {
     "name()": FunctionFragment;
     "nonces(address)": FunctionFragment;
     "numCheckpoints(address)": FunctionFragment;
+    "onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)": FunctionFragment;
     "onERC1155Received(address,address,uint256,uint256,bytes)": FunctionFragment;
     "onERC721Received(address,address,uint256,bytes)": FunctionFragment;
     "paused()": FunctionFragment;
@@ -45,7 +46,7 @@ interface LiteDAOInterface extends ethers.utils.Interface {
     "proposalCount()": FunctionFragment;
     "proposalVoteTypes(uint8)": FunctionFragment;
     "proposals(uint256)": FunctionFragment;
-    "propose(uint8,string,address,address,uint256,bytes)": FunctionFragment;
+    "propose(uint8,string,address[],uint256[],bytes[])": FunctionFragment;
     "quorum()": FunctionFragment;
     "setVoteTypes(uint8,uint8,uint8,uint8)": FunctionFragment;
     "supermajority()": FunctionFragment;
@@ -112,6 +113,10 @@ interface LiteDAOInterface extends ethers.utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
+    functionFragment: "onERC1155BatchReceived",
+    values: [string, string, BigNumberish[], BigNumberish[], BytesLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "onERC1155Received",
     values: [string, string, BigNumberish, BigNumberish, BytesLike]
   ): string;
@@ -150,7 +155,7 @@ interface LiteDAOInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "propose",
-    values: [BigNumberish, string, string, string, BigNumberish, BytesLike]
+    values: [BigNumberish, string, string[], BigNumberish[], BytesLike[]]
   ): string;
   encodeFunctionData(functionFragment: "quorum", values?: undefined): string;
   encodeFunctionData(
@@ -225,6 +230,10 @@ interface LiteDAOInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "nonces", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "numCheckpoints",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "onERC1155BatchReceived",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -457,6 +466,15 @@ export class LiteDAO extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    onERC1155BatchReceived(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish[],
+      arg3: BigNumberish[],
+      arg4: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[string] & { sig: string }>;
+
     onERC1155Received(
       arg0: string,
       arg1: string,
@@ -503,23 +521,9 @@ export class LiteDAO extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [
-        number,
-        string,
-        string,
-        string,
-        BigNumber,
-        string,
-        BigNumber,
-        BigNumber,
-        BigNumber
-      ] & {
+      [number, string, BigNumber, BigNumber, BigNumber] & {
         proposalType: number;
         description: string;
-        account: string;
-        asset: string;
-        amount: BigNumber;
-        payload: string;
         yesVotes: BigNumber;
         noVotes: BigNumber;
         creationTime: BigNumber;
@@ -529,10 +533,9 @@ export class LiteDAO extends BaseContract {
     propose(
       proposalType: BigNumberish,
       description: string,
-      account: string,
-      asset: string,
-      amount: BigNumberish,
-      payload: BytesLike,
+      account: string[],
+      amount: BigNumberish[],
+      payload: BytesLike[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -642,6 +645,15 @@ export class LiteDAO extends BaseContract {
 
   numCheckpoints(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+  onERC1155BatchReceived(
+    arg0: string,
+    arg1: string,
+    arg2: BigNumberish[],
+    arg3: BigNumberish[],
+    arg4: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
   onERC1155Received(
     arg0: string,
     arg1: string,
@@ -688,23 +700,9 @@ export class LiteDAO extends BaseContract {
     arg0: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
-    [
-      number,
-      string,
-      string,
-      string,
-      BigNumber,
-      string,
-      BigNumber,
-      BigNumber,
-      BigNumber
-    ] & {
+    [number, string, BigNumber, BigNumber, BigNumber] & {
       proposalType: number;
       description: string;
-      account: string;
-      asset: string;
-      amount: BigNumber;
-      payload: string;
       yesVotes: BigNumber;
       noVotes: BigNumber;
       creationTime: BigNumber;
@@ -714,10 +712,9 @@ export class LiteDAO extends BaseContract {
   propose(
     proposalType: BigNumberish,
     description: string,
-    account: string,
-    asset: string,
-    amount: BigNumberish,
-    payload: BytesLike,
+    account: string[],
+    amount: BigNumberish[],
+    payload: BytesLike[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -826,6 +823,15 @@ export class LiteDAO extends BaseContract {
 
     numCheckpoints(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+    onERC1155BatchReceived(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish[],
+      arg3: BigNumberish[],
+      arg4: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
     onERC1155Received(
       arg0: string,
       arg1: string,
@@ -859,7 +865,7 @@ export class LiteDAO extends BaseContract {
     processProposal(
       proposal: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<boolean>;
+    ): Promise<void>;
 
     proposalCount(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -872,23 +878,9 @@ export class LiteDAO extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [
-        number,
-        string,
-        string,
-        string,
-        BigNumber,
-        string,
-        BigNumber,
-        BigNumber,
-        BigNumber
-      ] & {
+      [number, string, BigNumber, BigNumber, BigNumber] & {
         proposalType: number;
         description: string;
-        account: string;
-        asset: string;
-        amount: BigNumber;
-        payload: string;
         yesVotes: BigNumber;
         noVotes: BigNumber;
         creationTime: BigNumber;
@@ -898,10 +890,9 @@ export class LiteDAO extends BaseContract {
     propose(
       proposalType: BigNumberish,
       description: string,
-      account: string,
-      asset: string,
-      amount: BigNumberish,
-      payload: BytesLike,
+      account: string[],
+      amount: BigNumberish[],
+      payload: BytesLike[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1128,6 +1119,15 @@ export class LiteDAO extends BaseContract {
 
     numCheckpoints(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+    onERC1155BatchReceived(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish[],
+      arg3: BigNumberish[],
+      arg4: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     onERC1155Received(
       arg0: string,
       arg1: string,
@@ -1178,10 +1178,9 @@ export class LiteDAO extends BaseContract {
     propose(
       proposalType: BigNumberish,
       description: string,
-      account: string,
-      asset: string,
-      amount: BigNumberish,
-      payload: BytesLike,
+      account: string[],
+      amount: BigNumberish[],
+      payload: BytesLike[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1306,6 +1305,15 @@ export class LiteDAO extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    onERC1155BatchReceived(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish[],
+      arg3: BigNumberish[],
+      arg4: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     onERC1155Received(
       arg0: string,
       arg1: string,
@@ -1356,10 +1364,9 @@ export class LiteDAO extends BaseContract {
     propose(
       proposalType: BigNumberish,
       description: string,
-      account: string,
-      asset: string,
-      amount: BigNumberish,
-      payload: BytesLike,
+      account: string[],
+      amount: BigNumberish[],
+      payload: BytesLike[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

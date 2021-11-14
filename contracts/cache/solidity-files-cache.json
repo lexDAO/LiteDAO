@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/Q/Desktop/git/lexDAO/LiteDAO/contracts/contracts/Factory.sol": {
-      "lastModificationDate": 1636636077330,
-      "contentHash": "1cd83af1792ba399187c4f18399ca730",
+      "lastModificationDate": 1636867941548,
+      "contentHash": "eddab28a4d856b3791aee614d20018a7",
       "sourceName": "contracts/Factory.sol",
       "solcConfig": {
         "version": "0.8.0",
@@ -39,8 +39,8 @@
       ]
     },
     "/Users/Q/Desktop/git/lexDAO/LiteDAO/contracts/contracts/LiteDAO.sol": {
-      "lastModificationDate": 1636636063938,
-      "contentHash": "6666fd78c3fa3fcfa5cfa4a1b5563736",
+      "lastModificationDate": 1636882350524,
+      "contentHash": "3a74409d67c990c2e675d304117a9e68",
       "sourceName": "contracts/LiteDAO.sol",
       "solcConfig": {
         "version": "0.8.0",
@@ -77,8 +77,8 @@
       ]
     },
     "/Users/Q/Desktop/git/lexDAO/LiteDAO/contracts/contracts/LiteDAOtoken.sol": {
-      "lastModificationDate": 1636636072219,
-      "contentHash": "9342ef13d4b4615ca679b0f8e451b6fd",
+      "lastModificationDate": 1636867901610,
+      "contentHash": "deeb0036be065de9e9b8b24fd0cf9b77",
       "sourceName": "contracts/LiteDAOtoken.sol",
       "solcConfig": {
         "version": "0.8.0",
@@ -112,8 +112,8 @@
       ]
     },
     "/Users/Q/Desktop/git/lexDAO/LiteDAO/contracts/contracts/LiteDAOnftHelper.sol": {
-      "lastModificationDate": 1636636070429,
-      "contentHash": "1cd7275ee33ae5a944d6aa63016f701c",
+      "lastModificationDate": 1636882095744,
+      "contentHash": "49a8f4a9c8d12fe7e77e158acd7f2db2",
       "sourceName": "contracts/LiteDAOnftHelper.sol",
       "solcConfig": {
         "version": "0.8.0",
